@@ -1,0 +1,30 @@
+# Project PRD (llms.txt)
+
+> Functional context for AI agents: the "what" and "why". Loaded early in the AGENTS.md
+> cascade, before behavioral rules. Keep it factual and current.
+
+## Goals
+
+- TODO: the primary goal of this project in one or two sentences.
+- TODO: secondary goals, if any.
+
+## Architecture
+
+- TODO: high-level architecture — components, services, and how data flows between them.
+- TODO: external systems this project integrates with.
+
+## Tech Stack
+
+- Frontend: TODO
+- Backend: TODO
+- Data store: TODO
+- Infra / deployment: TODO
+
+## Scope
+
+- **In scope:** TODO: what this project is responsible for.
+- **Out of scope / non-goals:** TODO: what this project deliberately does not do.
+
+## Key Constraints
+
+- TODO: performance, compliance, compatibility, or business constraints agents must honor.
