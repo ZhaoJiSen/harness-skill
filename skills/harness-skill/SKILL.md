@@ -65,9 +65,24 @@ Read the manifests and skim the directory structure to infer:
   another E2E tool) is wired up, and whether backend packages actually contain test files.
   Feed all of this into Step 3.5.
 - Directory layout and key components
+- **Modules & functionality** — do not stop at the tech stack. Read the source (not just
+  manifests) to build a functional map of the project:
+  - Enumerate the top-level modules / packages / services and summarize what each is responsible
+    for; identify entry points, routes/APIs, and core domain concepts.
+  - Derive the product's **feature list** by reading routes, API handlers, CLI commands, UI
+    pages/screens, and jobs — i.e. answer "what does this project actually do".
+  - This feeds `AGENTS.md` Project Overview (architecture, directory structure, key components)
+    and `llms.txt` Architecture (functional description).
 - Any existing conventions (linter config, formatter, commit style)
 
-Only ask the user for things you genuinely cannot infer. Prefer detection over questions here.
+For a large or unfamiliar codebase, delegate this analysis to an exploration subagent (broad,
+read-only sweep) and work from its summary, rather than skimming the tree yourself in the main
+flow — that keeps the map complete without missing modules.
+
+Only ask the user for things you genuinely cannot infer. Prefer detection over questions here —
+**except product intent**: `llms.txt` Goals (the *why* / business purpose) usually cannot be
+read from code. Draft it from the feature map, then ask the user to confirm or correct it rather
+than guessing or leaving it blank.
 
 ## Step 3 — Generate the files
 
