@@ -6,8 +6,8 @@
 
 - **General:** favor clarity over cleverness; match surrounding code.
 - **Per language:**
-  - TODO: e.g. TypeScript — strict mode on, no `any`, prefer named exports.
-  - TODO: e.g. Python — type hints required, format with ruff/black.
+  - TODO(detect): e.g. TypeScript — strict mode on, no `any`, prefer named exports.
+  - TODO(detect): e.g. Python — type hints required, format with ruff/black.
 - **Comments:** explain *why*, not *what*. Match the file's existing comment density.
 
 ## Framework conventions (skills)
@@ -15,23 +15,23 @@
 Framework- and library-specific conventions live in agent skills copied into
 [`../skills/`](../skills/). Load the relevant one before writing code in that area:
 
-- TODO: e.g. Vue — see [`../skills/vue/`](../skills/vue/) and
+- TODO(verify): e.g. Vue — see [`../skills/vue/`](../skills/vue/) and
   [`../skills/vue-best-practices/`](../skills/vue-best-practices/).
-- TODO: e.g. Tailwind CSS — see [`../skills/tailwindcss/`](../skills/tailwindcss/).
-- TODO: list one entry per skill copied in for this project's stack; drop this section if the
-  project has no matching framework skills.
+- TODO(verify): e.g. Tailwind CSS — see [`../skills/tailwindcss/`](../skills/tailwindcss/).
+- TODO(verify): list one entry per skill copied in for this project's stack; drop this section if
+  the project has no matching framework skills.
 
 ## Types & Static Analysis
 
-- Typecheck is a first-class gate: `TODO: e.g. tsc --noEmit / mypy / go vet`.
+- Typecheck is a first-class gate: `TODO(detect): e.g. tsc --noEmit / mypy / go vet`.
 - No new type errors. Never silence the type checker (`any`, `@ts-ignore`, `# type: ignore`,
   etc.) without a written justification in the change.
 
 ## Error Handling
 
 - Fail loud, not silent — never swallow exceptions or ignore returned errors.
-- Surface actionable messages. TODO: project error-handling pattern (Result type, exceptions,
-  error middleware…).
+- Surface actionable messages. TODO(verify): project error-handling pattern (Result type,
+  exceptions, error middleware…).
 
 ## Dependencies
 
@@ -41,11 +41,17 @@ Framework- and library-specific conventions live in agent skills copied into
 
 ## Commits & Branches
 
-- **Commit format:** TODO: e.g. Conventional Commits (`feat:`, `fix:`, `chore:`…).
-- **Branching:** TODO: e.g. work on feature branches, never push directly to `main`.
+- **Commit format:** TODO(verify): e.g. Conventional Commits (`feat:`, `fix:`, `chore:`…).
+- **Branching:** TODO(verify): e.g. work on feature branches, never push directly to `main`.
 - Keep commits focused; stage specific files rather than `git add .`.
 
 ## Documentation
 
 - Update `AGENTS.md` and `llms.txt` when architecture, commands, or scope change.
 - Treat agent instruction files as part of the execution surface, not static docs.
+- **Derived docs drift.** Tables reconstructed from code (route lists, field/error-code tables in
+  `../reference/`) are hand-maintained and go stale. Prefer generating them from a tool and
+  recording the refresh command; otherwise mark them `TODO(verify)` with a link to the source of
+  truth. Where a shape is only knowable by reading a handler (e.g. inline `gin.H{}` responses),
+  fix the root cause — extract it into a named type so swagger/codegen can see it — rather than
+  transcribing fields by hand.

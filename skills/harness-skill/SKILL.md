@@ -14,13 +14,18 @@ The end state for a project root is:
 
 ```
 <project root>/
-├── AGENTS.md        # active session rules (the canonical touchpoint), 4 core sections
+├── AGENTS.md        # active session rules (the canonical touchpoint) — an INDEX, 4 core sections
 ├── .agents/
-│   ├── AGENTS.md    # committed team base conventions — an index into rules/
+│   ├── AGENTS.md    # committed team base conventions — an index into rules/ and reference/
 │   ├── rules/
 │   │   ├── style.md     # code style, types, error handling, deps, commits, docs
 │   │   ├── security.md  # security baseline
-│   │   └── testing.md   # mandatory testing policy
+│   │   └── testing.md   # testing policy + regression coverage
+│   ├── reference/   # DEEP detail, emitted only when it applies (keeps AGENTS.md an index)
+│   │   ├── architecture.md   # module map, feature map, state machines
+│   │   ├── api-contracts.md  # envelope, error codes, pagination, SSE, auth invariants
+│   │   ├── config.md         # configuration field reference
+│   │   └── data-model.md     # datastores, schema, migrations, PII
 │   ├── commands/    # project-scoped agent commands (README placeholder)
 │   └── skills/      # agent skills for the detected stack, copied in (+ README)
 ├── llms.txt         # project PRD: goals, architecture, tech stack, scope
@@ -29,10 +34,24 @@ The end state for a project root is:
 └── .cursorrules -> AGENTS.md   (symlink)
 ```
 
+The root `AGENTS.md` is an **index**: keep it under ~300 lines and push depth (module map, API
+contracts, config, data model) into `.agents/reference/*`, which it links to. Emit a reference
+file only when the project actually has that substance — do not ship empty deep docs.
+
 ## Step 1 — Detect project state
 
-Determine the target directory (default: the current working directory; confirm with the
-user if ambiguous). Then decide **empty** vs **existing**:
+**Fix the target directory first — do not rely on the current working directory by luck.** Run
+`git rev-parse --show-toplevel` and compare it to the CWD:
+
+- If the CWD **is** the git root → that is the target root.
+- If the CWD is a **subdirectory** of the git root (e.g. you were invoked in `web/` of a
+  monorepo) → do **not** silently scaffold in the subdir. Ask the user whether the scope is the
+  **whole repository** (scaffold at the git root) or **just this subproject** (scaffold here, as a
+  nested layer). This mismatch is common and must be resolved explicitly, not guessed.
+- If there is no git repo → default to the CWD, and confirm with the user if the directory looks
+  ambiguous (e.g. a home dir or a parent of several projects).
+
+Then decide **empty** vs **existing**:
 
 - Look for source files and dependency manifests: `package.json`, `pom.xml`, `build.gradle`,
   `go.mod`, `Cargo.toml`, `pyproject.toml`, `requirements.txt`, `Gemfile`, `composer.json`,
@@ -56,44 +75,120 @@ Ask the user for the details you need to fill the templates. Use the AskUserQues
   policy in Step 3.5 rather than asking.
 - **Anything critical to know upfront** — deployment target, key constraints (optional)
 
-Where the user does not know a value, leave a clearly-marked `TODO:` placeholder in the
-generated files rather than guessing.
+Where the user does not know a value, leave a marked placeholder (`TODO(confirm)` for intent,
+`TODO(add)` for something they'll need to set up) rather than guessing — see Step 2.5.
 
 ## Step 2B — Existing project: auto-detect
 
-Read the manifests and skim the directory structure to infer:
+Detection must go past manifests into the source. Cover each layer below; record findings with
+the marker vocabulary from **Step 2.5**. Anything you cannot determine becomes `TODO(detect)`,
+never a silent omission.
 
-- Languages, frameworks, and key dependencies
-- Build / test / lint commands (from `scripts` in package.json, Makefile targets, CI config,
-  Maven/Gradle tasks, etc.) — capture the **exact** commands, not "run tests"
-- **Testing setup** — which frontend build tool is in use (is it Vite? check for `vite.config.*`
-  or `vite` in devDependencies), what unit/component test runner exists, whether Playwright (or
-  another E2E tool) is wired up, and whether backend packages actually contain test files.
-  Feed all of this into Step 3.5.
-- Directory layout and key components
-- **Modules & functionality** — do not stop at the tech stack. Read the source (not just
-  manifests) to build a functional map of the project:
-  - Enumerate the top-level modules / packages / services and summarize what each is responsible
-    for; identify entry points, routes/APIs, and core domain concepts.
-  - Derive the product's **feature list** by reading routes, API handlers, CLI commands, UI
-    pages/screens, and jobs — i.e. answer "what does this project actually do".
-  - This feeds `AGENTS.md` Project Overview (architecture, directory structure, key components)
-    and `llms.txt` Architecture (functional description).
-- Any existing conventions (linter config, formatter, commit style)
+**Stack & commands (baseline):**
 
-For a large or unfamiliar codebase, delegate this analysis to an exploration subagent (broad,
-read-only sweep) and work from its summary, rather than skimming the tree yourself in the main
-flow — that keeps the map complete without missing modules.
+- Languages, frameworks, and key dependencies (from manifests + lockfiles).
+- Build / test / lint / typecheck commands — the **exact** commands (from `scripts`, Makefile,
+  CI config, Maven/Gradle tasks), not "run tests".
+- Testing setup: is the frontend on Vite (`vite.config.*` / `vite` dep)? what unit runner exists?
+  is Playwright (or another E2E tool) wired up? do backend packages actually contain test files?
+  Feed this into Step 3.5.
 
-Only ask the user for things you genuinely cannot infer. Prefer detection over questions here —
-**except product intent**: `llms.txt` Goals (the *why* / business purpose) usually cannot be
-read from code. Draft it from the feature map, then ask the user to confirm or correct it rather
-than guessing or leaving it blank.
+**Functional map — extract from code, not just directory names (critique: modules are more than
+a tree).** For each top-level module/package/service, capture responsibility, entry point, key
+types, and who it talks to. Use language-specific extraction to build the feature list:
+
+- **Routes/APIs:** find the router definition and enumerate the route table — e.g. gin/echo (a
+  `RouterGroup` tree, often in a `v1.go`/`router.go`), Express/Fastify route registration, FastAPI
+  `@app.*` decorators, Spring `@RequestMapping`, Rails `routes.rb`. Point at the real file.
+- **CLI:** the command tree (cobra/clap/commander/argparse subcommands).
+- **UI:** page/screen/route map (file-based routes, router config).
+- **Jobs/async:** cron/queue/worker registrations, SSE/websocket handlers.
+- This is the source for `reference/architecture.md`.
+
+**Interface contracts — locate the source of truth, and record where auto-derivation breaks
+(critique: no contract layer; models assumed typed).**
+
+- Find the contract source: OpenAPI/swagger file, `resp`/`dto`/`model` packages, proto files.
+- Determine whether request/response shapes are **named types** or **inline** (e.g. `gin.H{}`,
+  anonymous dicts). If inline/untyped or the model package is largely empty, **say so**: a field
+  table cannot be fully auto-derived — record the split (e.g. "typed vs inline responses"),
+  point at the handlers, and recommend extracting inline shapes into named types. Do not fabricate
+  a field table. This feeds `reference/api-contracts.md`.
+- Capture the cross-cutting invariants swagger misses: response envelope, error-code catalog,
+  pagination convention, SSE/stream event format, auth/signature scheme.
+
+**Configuration — scan config, don't skip it (critique: no config reference).** Find config
+loading (viper/env/flags/`config.*`) and enumerate fields: type, default, whether required, and
+runtime impact (UDS paths, TLS, license paths, HA toggles, build flags like `CGO_ENABLED`, port
+ranges). This feeds `reference/config.md`.
+
+**Data model (critique: missing data layer).** Detect any datastore client (pgx/sqlx/gorm/prisma/
+mongo/redis…). Capture schema/tables from ORM models or SQL, the migrations tool + directory (or
+flag its absence), and PII/audit fields. This feeds `reference/data-model.md`.
+
+**Existing conventions & observability:** linter/formatter config, commit style, logging/metrics/
+tracing setup, and any existing agent files (e.g. a `web/AGENTS.md`) — reference those rather than
+duplicating them (see Step 2.6).
+
+**Reliability — do not depend on subagents being available (critique: subagents failed).** For a
+large codebase, prefer delegating the read-only sweep to an exploration subagent and working from
+its summary. But if subagents are unavailable or error out (model/permission failures, etc.), fall
+back to scanning in the main flow in bounded batches — never skip modules silently. Any area you
+could not analyze is recorded as `TODO(detect)` so the gap is visible.
+
+Prefer detection over questions — **except product intent**: `llms.txt` Goals (the *why*) usually
+cannot be read from code. Draft it from the feature map, then ask the user to confirm rather than
+guessing or leaving it blank (`TODO(confirm)`).
+
+## Step 2.5 — TODO marker vocabulary (use everywhere)
+
+A bare `TODO:` hides whether something is a real gap or just undetected. Use these four markers
+consistently across every generated file so a reader can tell them apart:
+
+- **`TODO(add):`** — genuinely missing; the project *should* build/adopt it (e.g. no tests exist,
+  no migration mechanism). This is a real gap, not a detection failure.
+- **`TODO(verify):`** — a value auto-derived from code that a human must confirm (route tables,
+  field/error tables, inferred architecture). These drift — see the anti-rot rule in Step 3.
+- **`TODO(detect):`** — the skill could not determine this (subagent failed, ambiguous code, not
+  found). A detection blind spot, explicitly flagged rather than omitted.
+- **`TODO(confirm):`** — product/business intent that code can't reveal; ask the user.
+
+Never leave a plain `TODO:` — always pick the right marker so gaps and blind spots aren't
+conflated (critique: TODOs don't distinguish "missing" from "not detected").
+
+## Step 2.6 — Monorepo & multi-stack projects
+
+When Step 2B finds more than one stack or independently-built subproject (e.g. a Go backend plus a
+Nuxt frontend, or several packages), do not cram two toolchains into one flat file:
+
+- **Layered files.** Generate the root `AGENTS.md` for repo-wide conventions, and a nested
+  `<subproject>/AGENTS.md` for each subproject's own build/test commands and local invariants.
+  The root file lists the subprojects and links to each nested file.
+- **Respect existing nested files.** If a subproject already has its own `AGENTS.md` (e.g.
+  `web/AGENTS.md`), reference it from the root rather than duplicating or overwriting it.
+- **Per-stack test/build commands.** Each stack keeps its own exact commands (a Go `go test` vs a
+  frontend `pnpm test`) in its own file — never merge them into one ambiguous list.
+- If instead you keep a single file (small repo, tightly coupled), give each stack its own clearly
+  labelled subsection rather than interleaving them.
 
 ## Step 3 — Generate the files
 
-Use the templates in `templates/` as the base and fill them in from Step 2. Keep the root
-`AGENTS.md` under ~300 lines, imperative, and operational.
+Use the templates in `templates/` as the base and fill them in from Step 2. The root `AGENTS.md`
+is an **index**: keep it under ~300 lines, imperative, and operational, and move depth into
+`.agents/reference/*` (critique: the 300-line cap fights depth — resolve it by externalizing, not
+by writing thin).
+
+**Anti-rot rule for derived content (apply throughout).** Anything reconstructed from code — route
+tables, endpoint field tables, error-code catalogs, config field lists — goes stale the moment the
+code changes. So:
+
+- Prefer generating it from a tool (swagger/openapi export, a route dumper) and record the **exact
+  refresh command** next to the table. 
+- If it must be hand-written, mark it `TODO(verify)` and link to the source-of-truth file so a
+  reader can re-check it.
+- When a shape is only knowable by reading a handler because it's inline (`gin.H{}`, anonymous
+  dicts), recommend the root-cause fix — extract it into a named type so swagger/codegen can see
+  it — instead of transcribing fields that will silently drift.
 
 1. **`AGENTS.md`** (project root) — from `templates/root-AGENTS.md`. Four core sections:
    - Project Overview (purpose, architecture, directory structure, tech stack, key deps)
@@ -114,6 +209,7 @@ Use the templates in `templates/` as the base and fill them in from Step 2. Keep
    - `.agents/commands/` and `.agents/skills/` — extension directories, each seeded with a
      README placeholder. `commands/` stays as-is unless the project has commands to add;
      `skills/` gets the detected stack's agent skills copied in during Step 3.8.
+   - `.agents/reference/*` — the deep docs (see item 5).
 
 3. **`llms.txt`** (project root) — from `templates/llms.txt`. The project PRD: goals,
    high-level architecture, tech stack, scope / non-goals.
@@ -128,14 +224,34 @@ Use the templates in `templates/` as the base and fill them in from Step 2. Keep
    Create each only if a file/symlink of that name does not already exist. Use relative link
    targets (as above) so the links survive the repo being moved or cloned. On Windows, note
    that symlinks may need Developer Mode; if creation fails, fall back to a one-line shim file
-   that says to read `AGENTS.md`, and tell the user.
+   that says to read `AGENTS.md`, and tell the user. Either way, record in the generated
+   `AGENTS.md` header that these files are symlinks/shims to it (see Step 3.9).
+
+5. **`.agents/reference/*`** — from `templates/agents/reference/`. The deep detail that keeps the
+   root `AGENTS.md` an index. **Emit each file only when the project has that substance**; delete
+   the ones that don't apply rather than shipping an empty shell:
+   - `architecture.md` — the module & feature map from Step 2B (responsibilities, entry points,
+     interactions, state machines). Emit for any non-trivial project.
+   - `api-contracts.md` — emit for an API service: envelope, error codes, pagination, SSE/stream
+     format, auth/signature, and the pointer to the contract source of truth.
+   - `config.md` — emit when the project has meaningful runtime configuration.
+   - `data-model.md` — emit when any datastore client is present (even without a migrations tool).
+   Fill these using the anti-rot rule above, and link them from `AGENTS.md` / `.agents/AGENTS.md`.
 
 ## Step 3.5 — Mandatory testing policy
 
 Every generated project must document and enforce automated tests. Bake the following into the
 root `AGENTS.md` **Build, Test & Push Instructions** and into `.agents/rules/testing.md`. Pick
 the concrete tools from the detected/declared stack — do not leave the *choice* as a `TODO:`, only
-leave `TODO:` for values you genuinely cannot know (e.g. an exact custom script name).
+leave a marker for values you genuinely cannot know (an exact custom script name → `TODO(detect)`;
+tests that don't exist yet → `TODO(add)`).
+
+**Testing is regression coverage, not just a runner choice (critique: testing.md was a wishlist).**
+Beyond picking runners, define in `.agents/rules/testing.md`: a per-domain critical-path matrix
+(rows from the feature map), an acceptance criterion per flow, one always-pass golden path, a
+fixture/setup-teardown & cleanup strategy, and an "always green" regression baseline wired into
+pre-push/CI. Distinguish `TODO(add)` (no tests exist — build them) from `TODO(detect)` (a suite
+may exist but wasn't found).
 
 **Frontend unit / component tests — required when a frontend stack exists:**
 
@@ -199,9 +315,22 @@ shows the stack warrants it:
 - **Accessibility — only when a web UI is present.** Require semantic HTML and compliance with
   accessibility standards (WCAG AA as a target). Note that Playwright specs can assert a11y.
 - **API contract stability — only for an API service.** Backward compatibility, a consistent
-  error-response shape, and explicit sign-off for breaking changes / versioning.
-- **Database migrations — only when a datastore/migrations tool is present.** Already-applied
-  migrations are immutable; changes are additive; every migration ships with a paired rollback.
+  error-response shape, and explicit sign-off for breaking changes / versioning. The concrete
+  invariants go in `reference/api-contracts.md`.
+- **Data layer — whenever a datastore client is present, not only when a migrations tool exists
+  (critique: pgx-without-migrations was missed).** Document the datastore and schema in
+  `reference/data-model.md`. If there is a client but **no** migrations mechanism, flag it as
+  `TODO(add)` rather than skipping the data layer. When migrations do exist: already-applied
+  migrations are immutable; changes are additive; each ships with a paired rollback.
+- **Observability — when logging/metrics/tracing is present or expected.** Where logs go, levels,
+  and correlation/trace IDs.
+- **Audit & log redaction — when the project handles PII, secrets, or auditable actions.** What
+  must be redacted from logs and what must be audited.
+- **Deployment runbook — when a `deploy/`, Helm chart, Dockerfile, or CI deploy exists.** Map the
+  deploy artifacts to the actual steps to ship, in the root `AGENTS.md` or a reference doc.
+
+Detection should be specific: base each section on a concrete signal (a client library, a config
+key, a directory), not a coarse yes/no, so real layers aren't dropped because one tool was absent.
 
 ## Step 3.8 — Framework skills (wire the detected stack to agent skills)
 
@@ -249,18 +378,38 @@ The skills ecosystem is managed by the `npx skills` CLI (`npx skills find <query
    to `.agents/skills/<name>/`. Group styling/frontend skills there; backend/test skills may be
    noted in the same section or alongside the relevant rule.
 
+## Step 3.9 — Symlink guardrails in the output
+
+Symlinks are fragile across platforms and confuse editors. Make the generated repo self-explain:
+
+- In the root `AGENTS.md` header, state that `CLAUDE.md`, `GEMINI.md`, and `.cursorrules` are
+  symlinks (or Windows shims) to `AGENTS.md` — so contributors edit `AGENTS.md`, not the links.
+- If you fell back to shim files (Windows / symlink creation failed), say so explicitly and tell
+  the user which files are shims.
+- The `templates/root-AGENTS.md` header already carries this note — keep it when you fill the file
+  in.
+
 ## Step 4 — Idempotency & safety
 
-- If `AGENTS.md`, `.agents/` (any of `AGENTS.md`, `rules/*`, `commands/`, `skills/`), or
-  `llms.txt` already exist, show the user what exists and ask whether to (a) skip, (b)
-  merge/update, or (c) overwrite. Never blow away existing agent rules without explicit
+- If `AGENTS.md`, `.agents/` (any of `AGENTS.md`, `rules/*`, `reference/*`, `commands/`,
+  `skills/`), or `llms.txt` already exist, show the user what exists and ask whether to (a) skip,
+  (b) merge/update, or (c) overwrite. Never blow away existing agent rules without explicit
   confirmation. When merging into an existing flat `.agents/AGENTS.md`, offer to split its
   contents into the `rules/` files rather than duplicating them.
 - For symlinks, skip any name that is already taken and report it.
 - For framework skills (Step 3.8), skip any `.agents/skills/<name>` that already exists rather
   than overwriting it, and never install a skill without the user's explicit approval.
+- Respect existing nested `AGENTS.md` files (Step 2.6) — reference, don't overwrite.
 
 ## Step 5 — Report
 
-Summarize what was created (as a short file tree) and point out any `TODO:` placeholders the
-user still needs to fill in. Do not recap file contents line by line.
+Summarize what was created (as a short file tree). Then list the outstanding markers **grouped by
+type** so the user knows what each demands:
+
+- **`TODO(add)`** — real gaps to build (e.g. no tests, no migrations).
+- **`TODO(confirm)`** — product intent awaiting the user's answer.
+- **`TODO(verify)`** — auto-derived content to double-check against code.
+- **`TODO(detect)`** — detection blind spots (including anything skipped because a subagent was
+  unavailable) that need a manual pass.
+
+Do not recap file contents line by line.

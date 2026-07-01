@@ -33,3 +33,14 @@ The rule files are authoritative; this is the short version so nothing is missed
   [`rules/style.md`](rules/style.md).
 - Update `AGENTS.md`, `llms.txt`, and these rules when architecture, commands, or scope change —
   treat agent instruction files as part of the execution surface, not static docs.
+
+## Deep reference
+
+Depth that would blow the root `AGENTS.md` past ~300 lines lives in `reference/` (emitted only
+when it applies). Consult and keep it current:
+
+- [`reference/architecture.md`](reference/architecture.md) — module map, feature map, state machines.
+- [`reference/api-contracts.md`](reference/api-contracts.md) — response envelope, error codes,
+  pagination, streaming/auth invariants, and the API source of truth.
+- [`reference/config.md`](reference/config.md) — configuration fields and runtime gotchas.
+- [`reference/data-model.md`](reference/data-model.md) — datastores, schema, migrations, PII.

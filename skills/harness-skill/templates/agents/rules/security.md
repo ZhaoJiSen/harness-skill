@@ -9,4 +9,4 @@
 - Pin dependency versions; flag unusual or typosquatting-looking package names.
 - Do not add authentication-, authorization-, or access-control-affecting changes without an
   explicit note in the change describing the impact.
-- TODO: project-specific security constraints (auth model, data classification, PII handling).
+- TODO(confirm): project-specific security constraints (auth model, data classification, PII handling).

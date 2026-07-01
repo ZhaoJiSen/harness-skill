@@ -17,7 +17,7 @@ into *other* projects. See `README.md` for user-facing install/usage.
 Two sets of files look similar but serve opposite roles. Do not confuse them:
 
 - **`skills/harness-skill/templates/*`** — skeletons the skill *writes into a target project*
-  when a user runs it. `root-AGENTS.md`, `agents/AGENTS.md`, `agents/rules/*`, `llms.txt` are output templates full
+  when a user runs it. `root-AGENTS.md`, `agents/AGENTS.md`, `agents/rules/*`, `agents/reference/*`, `llms.txt` are output templates full
   of `TODO:` placeholders. Editing these changes what end users' projects get.
 - A `CLAUDE.md` / `AGENTS.md` at the root of *this* repo (like this file) configures work *on
   this repo itself*. The skill never reads these.

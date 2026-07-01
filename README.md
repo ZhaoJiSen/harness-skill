@@ -47,13 +47,18 @@ Installer options:
 
 ```
 <project root>/
-├── AGENTS.md        # active session rules (canonical touchpoint), 4 core sections
+├── AGENTS.md        # active session rules (canonical touchpoint) — an index, 4 core sections
 ├── .agents/
-│   ├── AGENTS.md    # committed team base — an index into rules/
+│   ├── AGENTS.md    # committed team base — an index into rules/ and reference/
 │   ├── rules/
 │   │   ├── style.md     # code style, types, error handling, deps, commits, docs
 │   │   ├── security.md  # security baseline
-│   │   └── testing.md   # mandatory testing policy
+│   │   └── testing.md   # testing policy + regression coverage
+│   ├── reference/   # deep detail, emitted only when it applies
+│   │   ├── architecture.md   # module & feature map
+│   │   ├── api-contracts.md  # envelope, error codes, pagination, SSE, auth
+│   │   ├── config.md         # configuration fields
+│   │   └── data-model.md     # datastores, schema, migrations
 │   ├── commands/    # project-scoped agent commands
 │   └── skills/      # project-scoped agent skills
 ├── llms.txt         # project PRD: goals, architecture, tech stack, scope
@@ -61,6 +66,9 @@ Installer options:
 ├── GEMINI.md    -> AGENTS.md   (symlink)
 └── .cursorrules -> AGENTS.md   (symlink)
 ```
+
+The root `AGENTS.md` stays an index (kept under ~300 lines); depth lives in `.agents/reference/*`,
+which is emitted only when the project actually has that substance.
 
 ## Repo layout
 
@@ -89,6 +97,10 @@ Beyond the skeleton, the generated files carry a baked-in engineering baseline:
 - **Framework skills** — for each detected technology with a matching agent skill (Vue, Tailwind,
   Vitest, …), it offers to install any that are missing (`npx skills add`), copies them into
   `.agents/skills/`, and links them from `.agents/rules/style.md`.
+- **Depth where it matters** — for existing projects it extracts a module/feature map, API-contract
+  invariants, config fields, and the data model into `.agents/reference/*` (emitted only when
+  present), and marks unknowns with a `TODO(add|verify|detect|confirm)` taxonomy so real gaps are
+  distinguished from detection blind spots.
 
 ## The standard
 

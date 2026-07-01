@@ -45,13 +45,18 @@ node bin/cli.js
 
 ```
 <项目根目录>/
-├── AGENTS.md        # 活动会话规则(规范入口),4 个核心段落
+├── AGENTS.md        # 活动会话规则(规范入口)——索引,4 个核心段落
 ├── .agents/
-│   ├── AGENTS.md    # 团队基线约定——rules/ 的索引
+│   ├── AGENTS.md    # 团队基线约定——rules/ 与 reference/ 的索引
 │   ├── rules/
 │   │   ├── style.md     # 代码风格、类型、错误处理、依赖、提交、文档
 │   │   ├── security.md  # 安全基线
-│   │   └── testing.md   # 强制测试策略
+│   │   └── testing.md   # 测试策略 + 回归覆盖
+│   ├── reference/   # 深度内容,按需生成
+│   │   ├── architecture.md   # 模块与功能地图
+│   │   ├── api-contracts.md  # envelope、错误码、分页、SSE、签名
+│   │   ├── config.md         # 配置字段
+│   │   └── data-model.md     # 数据存储、表结构、迁移
 │   ├── commands/    # 项目级 agent 命令
 │   └── skills/      # 项目级 agent skill
 ├── llms.txt         # 项目 PRD:目标、架构、技术栈、范围
@@ -59,6 +64,9 @@ node bin/cli.js
 ├── GEMINI.md    -> AGENTS.md   (软链)
 └── .cursorrules -> AGENTS.md   (软链)
 ```
+
+根 AGENTS.md 保持索引角色(控制在 ~300 行内),深度内容进 `.agents/reference/*`,且仅在项目确有该
+类内容时才生成。
 
 ## 仓库结构
 
@@ -85,6 +93,9 @@ bin/cli.js                    # 零依赖安装器
 - **框架 skill 链接** —— 对每个探测到、且有对应 agent skill 的技术(Vue、Tailwind、Vitest 等),
   缺失的会先征询是否安装(`npx skills add`),再拷贝进 `.agents/skills/`,并在
   `.agents/rules/style.md` 里链接过去。
+- **深度内容** —— 对已有项目,会抽取模块/功能地图、接口契约不变量、配置字段、数据模型到
+  `.agents/reference/*`(仅在存在时生成),并用 `TODO(add|verify|detect|confirm)` 分类标记未知项,
+  把"真缺口"和"检测盲区"区分开。
 
 ## 相关标准
 
