@@ -1,7 +1,8 @@
-# harness-init
+# agents-md-init
 
-A Claude Code / agent skill that scaffolds a complete set of **AGENTS.md-standard** files into
-a project — the public "agent-native repo" spec promoted by Harness.
+Install the **`harness-init`** agent skill with one command. The skill scaffolds a complete set
+of **AGENTS.md-standard** files into a project — the public "agent-native repo" spec promoted by
+Harness.
 
 It handles two cases:
 
@@ -10,7 +11,35 @@ It handles two cases:
 - **Existing project** — auto-detects your stack, build/test commands, and layout from the code
   and config, then generates populated files.
 
-## What it generates
+## Install (Node)
+
+Run the installer with npx (no global install needed):
+
+```bash
+npx agents-md-init
+```
+
+…or install it globally so the command stays available:
+
+```bash
+npm install -g agents-md-init
+agents-md-init
+```
+
+Either way it copies the skill into `~/.claude/skills/harness-init`. Then, in any project,
+invoke it with `/harness-init` in Claude Code (or just ask your agent to "set up AGENTS.md").
+
+### Installer options
+
+```
+-p, --project      Install into ./.claude/skills instead of the home dir
+-d, --dir <path>   Install into a custom skills base directory
+-f, --force        Overwrite an existing installation
+-v, --version      Print version
+-h, --help         Show help
+```
+
+## What the skill generates
 
 ```
 <project root>/
@@ -23,22 +52,9 @@ It handles two cases:
 └── .cursorrules -> AGENTS.md   (symlink)
 ```
 
-## Install
+## Repo layout
 
-Install as a personal skill by linking (or copying) this repo into your skills directory:
-
-```bash
-# symlink (recommended — pull updates with git)
-ln -s "$(pwd)" ~/.claude/skills/harness-init
-
-# or copy
-cp -r "$(pwd)" ~/.claude/skills/harness-init
-```
-
-Then, in a project, invoke it with `/harness-init` (or just ask the agent to "set up AGENTS.md").
-
-## Layout
-
+- `bin/cli.js` — the Node installer (zero dependencies).
 - `SKILL.md` — the skill's instructions (the flow the agent follows).
 - `templates/` — file skeletons for `AGENTS.md`, `.agents/AGENTS.md`, and `llms.txt`.
 - `reference/harness-spec.md` — condensed spec, loaded on demand.

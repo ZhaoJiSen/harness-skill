@@ -1,0 +1,28 @@
+{
+  "name": "agents-md-init",
+  "version": "0.1.0",
+  "description": "Install the harness-init agent skill: scaffolds AGENTS.md-standard files (root AGENTS.md, .agents/, llms.txt) into any project, following the public agent-native repo spec promoted by Harness.",
+  "bin": {
+    "agents-md-init": "bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "SKILL.md",
+    "templates/",
+    "reference/"
+  ],
+  "engines": {
+    "node": ">=16.7.0"
+  },
+  "keywords": [
+    "agents.md",
+    "agents-md",
+    "claude-code",
+    "skill",
+    "harness",
+    "agents",
+    "scaffold",
+    "cli"
+  ],
+  "license": "MIT"
+}
