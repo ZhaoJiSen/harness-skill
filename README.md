@@ -49,7 +49,13 @@ Installer options:
 <project root>/
 ├── AGENTS.md        # active session rules (canonical touchpoint), 4 core sections
 ├── .agents/
-│   └── AGENTS.md    # committed team base conventions
+│   ├── AGENTS.md    # committed team base — an index into rules/
+│   ├── rules/
+│   │   ├── style.md     # code style, types, error handling, deps, commits, docs
+│   │   ├── security.md  # security baseline
+│   │   └── testing.md   # mandatory testing policy
+│   ├── commands/    # project-scoped agent commands
+│   └── skills/      # project-scoped agent skills
 ├── llms.txt         # project PRD: goals, architecture, tech stack, scope
 ├── CLAUDE.md    -> AGENTS.md   (symlink)
 ├── GEMINI.md    -> AGENTS.md   (symlink)
@@ -61,7 +67,7 @@ Installer options:
 ```
 skills/harness-skill/
 ├── SKILL.md                  # the skill's instructions (the flow the agent follows)
-├── templates/                # skeletons for AGENTS.md, .agents/AGENTS.md, llms.txt
+├── templates/                # skeletons: root AGENTS.md, .agents/ (AGENTS.md + rules/), llms.txt
 └── reference/harness-spec.md # condensed spec, loaded on demand
 bin/cli.js                    # zero-dependency installer
 ```

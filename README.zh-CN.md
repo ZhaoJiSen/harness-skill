@@ -47,7 +47,13 @@ node bin/cli.js
 <项目根目录>/
 ├── AGENTS.md        # 活动会话规则(规范入口),4 个核心段落
 ├── .agents/
-│   └── AGENTS.md    # 团队基线约定
+│   ├── AGENTS.md    # 团队基线约定——rules/ 的索引
+│   ├── rules/
+│   │   ├── style.md     # 代码风格、类型、错误处理、依赖、提交、文档
+│   │   ├── security.md  # 安全基线
+│   │   └── testing.md   # 强制测试策略
+│   ├── commands/    # 项目级 agent 命令
+│   └── skills/      # 项目级 agent skill
 ├── llms.txt         # 项目 PRD:目标、架构、技术栈、范围
 ├── CLAUDE.md    -> AGENTS.md   (软链)
 ├── GEMINI.md    -> AGENTS.md   (软链)
@@ -59,7 +65,7 @@ node bin/cli.js
 ```
 skills/harness-skill/
 ├── SKILL.md                  # skill 主流程指令(agent 遵循的步骤)
-├── templates/                # AGENTS.md / .agents/AGENTS.md / llms.txt 的骨架模板
+├── templates/                # 骨架模板:根 AGENTS.md、.agents/(AGENTS.md + rules/)、llms.txt
 └── reference/harness-spec.md # 精简版规范,按需加载
 bin/cli.js                    # 零依赖安装器
 ```

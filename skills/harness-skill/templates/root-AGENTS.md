@@ -62,7 +62,8 @@ Work is complete only when **all** of the following pass:
   TODO: project-specific security constraints.
 - **Architectural constraints:** TODO: boundaries agents must respect (e.g. no cross-module
   imports, keep domain logic out of controllers).
-- For the full team baseline (style, commit format), see [`.agents/AGENTS.md`](.agents/AGENTS.md).
+- For the full team baseline, see [`.agents/AGENTS.md`](.agents/AGENTS.md) and the split rules in
+  [`.agents/rules/`](.agents/rules/) (style, security, testing).
 
 ## Common Pitfalls & Prohibited Patterns
 

@@ -16,7 +16,13 @@ The end state for a project root is:
 <project root>/
 ├── AGENTS.md        # active session rules (the canonical touchpoint), 4 core sections
 ├── .agents/
-│   └── AGENTS.md    # committed team base conventions
+│   ├── AGENTS.md    # committed team base conventions — an index into rules/
+│   ├── rules/
+│   │   ├── style.md     # code style, types, error handling, deps, commits, docs
+│   │   ├── security.md  # security baseline
+│   │   └── testing.md   # mandatory testing policy
+│   ├── commands/    # project-scoped agent commands (README placeholder)
+│   └── skills/      # project-scoped agent skills (README placeholder)
 ├── llms.txt         # project PRD: goals, architecture, tech stack, scope
 ├── CLAUDE.md    -> AGENTS.md   (symlink)
 ├── GEMINI.md    -> AGENTS.md   (symlink)
@@ -96,8 +102,18 @@ Use the templates in `templates/` as the base and fill them in from Step 2. Keep
      `.agents/AGENTS.md` rather than bloating this file)
    - Common Pitfalls & Prohibited Patterns (anti-patterns, deprecated APIs, frozen public APIs)
 
-2. **`.agents/AGENTS.md`** — from `templates/agents-base.md`. Committed, stable team base
-   conventions (per-language style, security baseline, commit format).
+2. **`.agents/` directory** — the committed, stable team base, copied from `templates/agents/`
+   and split by concern so each file stays focused:
+   - `.agents/AGENTS.md` — a short index that links to the rule files and states the
+     non-negotiables. Do not cram all conventions in here; it points into `rules/`.
+   - `.agents/rules/style.md` — per-language code style, types/static-analysis gate, error
+     handling, comments, dependency policy, commit/branch format, documentation.
+   - `.agents/rules/security.md` — the security baseline (secrets, input validation,
+     parameterized queries, dependency pinning).
+   - `.agents/rules/testing.md` — the mandatory testing policy (see Step 3.5).
+   - `.agents/commands/` and `.agents/skills/` — extension directories, each seeded with a
+     README placeholder explaining what belongs there. Leave the README unless the project
+     already has commands/skills to put in them.
 
 3. **`llms.txt`** (project root) — from `templates/llms.txt`. The project PRD: goals,
    high-level architecture, tech stack, scope / non-goals.
@@ -117,8 +133,8 @@ Use the templates in `templates/` as the base and fill them in from Step 2. Keep
 ## Step 3.5 — Mandatory testing policy
 
 Every generated project must document and enforce automated tests. Bake the following into the
-**Build, Test & Push Instructions** and **Testing** sections of the files you write. Pick the
-concrete tools from the detected/declared stack — do not leave the *choice* as a `TODO:`, only
+root `AGENTS.md` **Build, Test & Push Instructions** and into `.agents/rules/testing.md`. Pick
+the concrete tools from the detected/declared stack — do not leave the *choice* as a `TODO:`, only
 leave `TODO:` for values you genuinely cannot know (e.g. an exact custom script name).
 
 **Frontend unit / component tests — required when a frontend stack exists:**
@@ -163,7 +179,7 @@ These apply to **every** project regardless of stack. Fill them into the generat
 **Dependency changes:** before adding a new runtime dependency, prefer the standard library or
 an already-present dependency; adding a new one requires an explicit reason in the change. Pin
 exact/locked versions and flag unusual or typosquatting-looking names. (This lives in
-`.agents/AGENTS.md`.)
+`.agents/rules/style.md`.)
 
 **Type checking / static analysis as a first-class gate:** capture the exact typecheck command
 (e.g. `tsc --noEmit`, `mypy`, `go vet`) and state that work must not introduce new type errors,
@@ -189,9 +205,11 @@ shows the stack warrants it:
 
 ## Step 4 — Idempotency & safety
 
-- If `AGENTS.md`, `.agents/AGENTS.md`, or `llms.txt` already exist, show the user what exists
-  and ask whether to (a) skip, (b) merge/update, or (c) overwrite. Never blow away existing
-  agent rules without explicit confirmation.
+- If `AGENTS.md`, `.agents/` (any of `AGENTS.md`, `rules/*`, `commands/`, `skills/`), or
+  `llms.txt` already exist, show the user what exists and ask whether to (a) skip, (b)
+  merge/update, or (c) overwrite. Never blow away existing agent rules without explicit
+  confirmation. When merging into an existing flat `.agents/AGENTS.md`, offer to split its
+  contents into the `rules/` files rather than duplicating them.
 - For symlinks, skip any name that is already taken and report it.
 
 ## Step 5 — Report
