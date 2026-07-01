@@ -39,7 +39,9 @@
 
 ## Build, Test & Push Instructions
 
-Run the **exact** commands below. Do not paraphrase them.
+Run the **exact** commands below. Do not paraphrase them. The `pnpm`/JS commands are examples —
+replace them with the detected stack's real commands (Go, Python, Rust, …), and remove lines that
+don't apply (e.g. no frontend runner / no E2E on a pure-backend service).
 
 - **Install:** `TODO(detect): e.g. pnpm install`
 - **Build:** `TODO(detect): e.g. pnpm build`

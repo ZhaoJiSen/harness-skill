@@ -8,7 +8,11 @@
 
 ## Runners (the tools)
 
-### Frontend unit / component tests — required when a frontend stack exists
+> Keep only the subsections that match this project's stack. A pure-backend project drops the
+> frontend and E2E subsections; a pure-frontend project drops the backend subsection. Replace the
+> JS/`pnpm` examples with the real commands for the detected stack.
+
+### Frontend unit / component tests — required when a frontend stack exists (drop if pure backend)
 
 - Use **Vitest** if the project builds with **Vite** (a `vite.config.*` exists, or `vite` is a
   dependency) — it shares Vite's config and transform pipeline.
@@ -17,12 +21,12 @@
 - Pair the runner with the framework's component-testing library (React Testing Library, Vue
   Test Utils, …). TODO(detect): name the runner chosen and where specs live.
 
-### End-to-end / browser tests — required for any web app or site with a UI
+### End-to-end / browser tests — required for any web app or site with a UI (drop if UI-less backend)
 
 - Use **Playwright**. TODO(detect): E2E specs live in `e2e/` (or `tests/e2e/`); document the run
   command (e.g. `npx playwright test`).
 
-### Backend tests — required for every backend language present
+### Backend tests — required for every backend language present (drop if pure frontend)
 
 - Each backend language/service ships with test files in its idiomatic framework:
   pytest (Python) / JUnit (Java) / `go test` (Go) / `cargo test` (Rust) / Vitest|Jest (Node) /

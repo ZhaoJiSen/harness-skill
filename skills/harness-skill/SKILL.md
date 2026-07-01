@@ -156,10 +156,30 @@ consistently across every generated file so a reader can tell them apart:
 Never leave a plain `TODO:` — always pick the right marker so gaps and blind spots aren't
 conflated (critique: TODOs don't distinguish "missing" from "not detected").
 
-## Step 2.6 — Monorepo & multi-stack projects
+## Step 2.6 — Project shape: single-stack, monorepo & multi-stack
 
-When Step 2B finds more than one stack or independently-built subproject (e.g. a Go backend plus a
-Nuxt frontend, or several packages), do not cram two toolchains into one flat file:
+Tailor the output to how many stacks the project actually has. The templates default to
+JS/frontend idioms (`pnpm`, `Vitest`, `Playwright`, `tsc`) as *examples* — never ship those to a
+project that isn't JS/frontend.
+
+**Single-stack — pure frontend or pure backend (the common case).** Generate for the one stack
+present and **delete** the sections that don't apply rather than leaving dangling `TODO`s:
+
+- **Pure frontend** (no server code of your own): keep frontend unit/component tests, E2E, and
+  accessibility. Drop the backend-tests section. Emit `reference/api-contracts.md` only if the app
+  *defines* an API/BFF (not merely consumes one); usually drop `data-model.md`. `config.md` covers
+  build/runtime env (e.g. Vite env vars) if meaningful.
+- **Pure backend** (no UI): use the detected language's real idioms — e.g. Go → `go test` +
+  `go vet` + `go build`, Python → `pytest` + `mypy`, Rust → `cargo test`. **Drop** the frontend
+  unit-test section, E2E/Playwright, and accessibility entirely. Keep `reference/api-contracts.md`
+  (for an API service), `config.md`, and `data-model.md` (if a datastore client exists). Replace
+  the JS example commands in `AGENTS.md`, don't leave them as `pnpm ...`.
+- Either way, in `AGENTS.md` Project Overview mark the absent side as "none" and remove its
+  placeholder rows instead of leaving `TODO(detect): frontend framework` on a backend-only repo.
+
+**Monorepo / multi-stack.** When more than one stack or independently-built subproject exists
+(e.g. a Go backend plus a Nuxt frontend, or several packages), do not cram two toolchains into one
+flat file:
 
 - **Layered files.** Generate the root `AGENTS.md` for repo-wide conventions, and a nested
   `<subproject>/AGENTS.md` for each subproject's own build/test commands and local invariants.
@@ -253,7 +273,8 @@ fixture/setup-teardown & cleanup strategy, and an "always green" regression base
 pre-push/CI. Distinguish `TODO(add)` (no tests exist — build them) from `TODO(detect)` (a suite
 may exist but wasn't found).
 
-**Frontend unit / component tests — required when a frontend stack exists:**
+**Frontend unit / component tests — required when a frontend stack exists (omit this whole
+section for a pure-backend project):**
 
 - If the frontend build tool is **Vite** (a `vite.config.*` exists, or `vite` is a dependency)
   → use **Vitest** (https://vitest.dev). It shares Vite's config and transform pipeline, so it
@@ -264,13 +285,14 @@ may exist but wasn't found).
 - Pair the runner with the framework's component-testing library (React Testing Library,
   Vue Test Utils, etc.) when a UI framework is present.
 
-**End-to-end / browser tests — required for any web app or site with a UI:**
+**End-to-end / browser tests — required for any web app or site with a UI (omit for a UI-less
+backend/API service):**
 
 - Use **Playwright** (https://playwright.dev) as the E2E framework. Document the install/run
   commands (`npm init playwright@latest`, `npx playwright test`) and where specs live
   (`e2e/` or `tests/e2e/`).
 
-**Backend tests — required for every backend language present:**
+**Backend tests — required for every backend language present (omit for a pure-frontend project):**
 
 - Each backend language/service must ship with test files using its idiomatic framework, and the
   AGENTS.md must say so explicitly. Map the detected language to its standard tool:
