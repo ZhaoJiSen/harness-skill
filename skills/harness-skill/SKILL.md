@@ -62,10 +62,28 @@ Then decide **empty** vs **existing**:
 Also check whether `AGENTS.md`, `.agents/`, or `llms.txt` already exist. If any do, do **not**
 overwrite silently — see Step 4.
 
+## Step 1.5 — Choose the output language
+
+The bundled templates are written in English, but the generated docs should be in whatever
+language the team reads. Decide this **before** generating anything (it applies to both the empty
+and existing paths):
+
+- Ask the user which language the generated files should be written in, using the AskUserQuestion
+  tool. Offer the language they are conversing in as the recommended default (e.g. if they are
+  writing to you in Chinese, default to 中文), plus English, plus "other".
+- If an existing project already has docs in an obvious language (e.g. a Chinese `README`), you
+  may propose that as the default — but still confirm rather than assume.
+- Write **all generated prose** — section bodies, and headings too — in the chosen language,
+  translating the template text as you fill it in rather than copying the English verbatim.
+- Keep these **unchanged** regardless of language, so tooling and cross-references keep working:
+  code, commands, and file paths; the file names themselves (`AGENTS.md`, `llms.txt`, etc.); and
+  the `TODO(add|verify|detect|confirm)` marker keywords (translate the explanation after the
+  marker, not the marker itself).
+
 ## Step 2A — Empty project: interactive intake
 
 Ask the user for the details you need to fill the templates. Use the AskUserQuestion tool
-(batch related questions). Cover:
+(batch related questions — include the Step 1.5 output-language question in the same batch). Cover:
 
 - **Project type** — web app / API service / CLI / library / mobile / monorepo / other
 - **Frontend stack** — framework + language (e.g. React + TypeScript, Vue, none)

@@ -101,6 +101,9 @@ Beyond the skeleton, the generated files carry a baked-in engineering baseline:
   invariants, config fields, and the data model into `.agents/reference/*` (emitted only when
   present), and marks unknowns with a `TODO(add|verify|detect|confirm)` taxonomy so real gaps are
   distinguished from detection blind spots.
+- **Output language** — it asks up front which language to write the generated docs in (defaulting
+  to the language you're chatting in), so a team can get Chinese (or any language) content while
+  code, commands, and file names stay intact.
 
 ## The standard
 
