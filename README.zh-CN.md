@@ -66,6 +66,17 @@ bin/cli.js                    # 零依赖安装器
 
 `skills/harness-skill/` 是自包含的 skill 目录,因此 `skills add` 只会安装这些文件,不带其他内容。
 
+## 会强制哪些约束
+
+除了骨架,生成的文件还内置了一套工程基线:
+
+- **测试** —— 前端单元/组件测试:Vite 项目用 **Vitest**、非 Vite 用 **Jest**;E2E 统一
+  **Playwright**;每种后端语言都配套惯用测试文件。
+- **质量门禁** —— 类型检查门禁、依赖变更策略,以及一份 Definition of Done 清单(build + lint +
+  typecheck + 测试全绿、无密钥泄露)。
+- **条件段落** —— 可访问性(Web UI)、API 契约稳定性(API 服务)、数据库迁移纪律(带数据存储的
+  项目)仅在技术栈匹配时才生成。
+
 ## 相关标准
 
 基于 AGENTS.md 分层配置标准。精简版见

@@ -29,10 +29,30 @@ Run the **exact** commands below. Do not paraphrase them.
 - **Install:** `TODO: e.g. pnpm install`
 - **Build:** `TODO: e.g. pnpm build`
 - **Run/dev:** `TODO: e.g. pnpm dev`
-- **Test:** `TODO: e.g. pnpm test` (run the full suite before considering work done)
+- **Test (unit/component):** `TODO: e.g. pnpm test` — run the full suite before considering work done.
+  - Frontend runner: TODO: **Vitest** if this is a Vite project, otherwise **Jest** (or the
+    framework's canonical runner). Do not mix the two.
+  - Backend: TODO: each backend language's idiomatic runner (pytest / JUnit / `go test` /
+    `cargo test` / Vitest|Jest for Node …).
+- **E2E tests:** `TODO: e.g. npx playwright test` — **Playwright** specs live in TODO: `e2e/`.
+- **Typecheck:** `TODO: e.g. tsc --noEmit / mypy / go vet` — no new type errors; do not silence
+  them with `any` / `@ts-ignore` / `# type: ignore` without a written reason.
 - **Lint:** `TODO: e.g. pnpm lint`
 - **Format:** `TODO: e.g. pnpm format`
-- **Pre-push checks:** TODO: what must pass before pushing (e.g. lint + typecheck + tests green).
+- **CI:** TODO: what the CI pipeline runs, so local checks match CI.
+- **Pre-push checks:** TODO: what must pass before pushing — at minimum lint + typecheck + the
+  full unit suite green, plus relevant Playwright E2E specs.
+
+### Definition of Done
+
+Work is complete only when **all** of the following pass:
+
+- [ ] Build succeeds
+- [ ] Lint passes
+- [ ] Typecheck passes (no new errors, no unexplained suppressions)
+- [ ] Full unit/component suite green
+- [ ] Relevant E2E (Playwright) specs green
+- [ ] No secrets committed
 
 ## Development Workflow
 

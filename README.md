@@ -69,6 +69,18 @@ bin/cli.js                    # zero-dependency installer
 `skills/harness-skill/` is a self-contained skill directory, so `skills add` installs exactly
 those files and nothing else.
 
+## What it enforces
+
+Beyond the skeleton, the generated files carry a baked-in engineering baseline:
+
+- **Testing** — frontend unit/component tests via **Vitest** (Vite projects) or **Jest**
+  (non-Vite), **Playwright** for E2E, and idiomatic test files for every backend language.
+- **Quality gates** — a type-checking gate, a dependency-change policy, and a Definition of Done
+  checklist (build + lint + typecheck + tests green, no secrets).
+- **Conditional sections** — accessibility (web UIs), API contract stability (API services), and
+  database-migration discipline (projects with a datastore) are added only when the stack calls
+  for them.
+
 ## The standard
 
 Based on the AGENTS.md hierarchical configuration standard. See

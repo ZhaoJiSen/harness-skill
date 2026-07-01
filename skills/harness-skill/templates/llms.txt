@@ -24,6 +24,8 @@
 
 - **In scope:** TODO: what this project is responsible for.
 - **Out of scope / non-goals:** TODO: what this project deliberately does not do.
+- **Quality intent:** TODO: e.g. user-facing features require E2E coverage; correctness over
+  speed of delivery. (The concrete test/quality *rules* live in `AGENTS.md`, not here.)
 
 ## Key Constraints
 
