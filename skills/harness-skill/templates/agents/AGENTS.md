@@ -18,7 +18,8 @@ review. Read the file relevant to the change you are making:
 Two extension directories hold project-specific agent assets:
 
 - [`commands/`](commands/) — reusable prompts / slash-commands for agents working in this repo.
-- [`skills/`](skills/) — project-scoped agent skills.
+- [`skills/`](skills/) — agent skills for this project's stack (Vue, Tailwind, etc.), copied in
+  and linked from [`rules/style.md`](rules/style.md).
 
 ## Non-negotiables (summary)
 

@@ -1,9 +1,11 @@
 # Skills
 
-Project-scoped agent skills — capabilities specific to this repo that agents can load on demand.
+Agent skills for this project's stack — framework/library conventions agents load on demand.
 
-Each skill is its own subdirectory containing a `SKILL.md` (frontmatter with `name` +
-`description`, then the instructions). Keep skills self-contained; load heavy reference material
-on demand rather than inlining it.
+The `harness-skill` scaffolder copies a skill in here for each detected technology that has one
+(e.g. `vue/`, `tailwindcss/`, `vitest/`), so they travel with the repo and are version-pinned.
+Each skill is a self-contained subdirectory with its own `SKILL.md`. The rules in
+[`../rules/style.md`](../rules/style.md) link to the relevant ones.
 
-TODO: add your first skill, or delete this directory if you don't use project skills.
+To add more later, install with `npx skills add <owner/name>` then copy the resolved directory
+here (`cp -RL`), or run the `harness-skill` again. Browse skills at https://skills.sh.

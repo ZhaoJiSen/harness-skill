@@ -86,6 +86,9 @@ Beyond the skeleton, the generated files carry a baked-in engineering baseline:
 - **Conditional sections** — accessibility (web UIs), API contract stability (API services), and
   database-migration discipline (projects with a datastore) are added only when the stack calls
   for them.
+- **Framework skills** — for each detected technology with a matching agent skill (Vue, Tailwind,
+  Vitest, …), it offers to install any that are missing (`npx skills add`), copies them into
+  `.agents/skills/`, and links them from `.agents/rules/style.md`.
 
 ## The standard
 

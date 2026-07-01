@@ -10,6 +10,17 @@
   - TODO: e.g. Python — type hints required, format with ruff/black.
 - **Comments:** explain *why*, not *what*. Match the file's existing comment density.
 
+## Framework conventions (skills)
+
+Framework- and library-specific conventions live in agent skills copied into
+[`../skills/`](../skills/). Load the relevant one before writing code in that area:
+
+- TODO: e.g. Vue — see [`../skills/vue/`](../skills/vue/) and
+  [`../skills/vue-best-practices/`](../skills/vue-best-practices/).
+- TODO: e.g. Tailwind CSS — see [`../skills/tailwindcss/`](../skills/tailwindcss/).
+- TODO: list one entry per skill copied in for this project's stack; drop this section if the
+  project has no matching framework skills.
+
 ## Types & Static Analysis
 
 - Typecheck is a first-class gate: `TODO: e.g. tsc --noEmit / mypy / go vet`.

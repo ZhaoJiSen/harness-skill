@@ -82,6 +82,9 @@ bin/cli.js                    # 零依赖安装器
   typecheck + 测试全绿、无密钥泄露)。
 - **条件段落** —— 可访问性(Web UI)、API 契约稳定性(API 服务)、数据库迁移纪律(带数据存储的
   项目)仅在技术栈匹配时才生成。
+- **框架 skill 链接** —— 对每个探测到、且有对应 agent skill 的技术(Vue、Tailwind、Vitest 等),
+  缺失的会先征询是否安装(`npx skills add`),再拷贝进 `.agents/skills/`,并在
+  `.agents/rules/style.md` 里链接过去。
 
 ## 相关标准
 

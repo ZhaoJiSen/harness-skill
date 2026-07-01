@@ -22,7 +22,7 @@ The end state for a project root is:
 │   │   ├── security.md  # security baseline
 │   │   └── testing.md   # mandatory testing policy
 │   ├── commands/    # project-scoped agent commands (README placeholder)
-│   └── skills/      # project-scoped agent skills (README placeholder)
+│   └── skills/      # agent skills for the detected stack, copied in (+ README)
 ├── llms.txt         # project PRD: goals, architecture, tech stack, scope
 ├── CLAUDE.md    -> AGENTS.md   (symlink)
 ├── GEMINI.md    -> AGENTS.md   (symlink)
@@ -112,8 +112,8 @@ Use the templates in `templates/` as the base and fill them in from Step 2. Keep
      parameterized queries, dependency pinning).
    - `.agents/rules/testing.md` — the mandatory testing policy (see Step 3.5).
    - `.agents/commands/` and `.agents/skills/` — extension directories, each seeded with a
-     README placeholder explaining what belongs there. Leave the README unless the project
-     already has commands/skills to put in them.
+     README placeholder. `commands/` stays as-is unless the project has commands to add;
+     `skills/` gets the detected stack's agent skills copied in during Step 3.8.
 
 3. **`llms.txt`** (project root) — from `templates/llms.txt`. The project PRD: goals,
    high-level architecture, tech stack, scope / non-goals.
@@ -203,6 +203,52 @@ shows the stack warrants it:
 - **Database migrations — only when a datastore/migrations tool is present.** Already-applied
   migrations are immutable; changes are additive; every migration ships with a paired rollback.
 
+## Step 3.8 — Framework skills (wire the detected stack to agent skills)
+
+For **every** framework, library, or tool detected in Step 2 that has a matching agent skill,
+copy that skill into the project's `.agents/skills/` and reference it from the rules, so any
+agent working in the repo picks up its conventions. Do this for the whole detected stack, not
+just styling.
+
+The skills ecosystem is managed by the `npx skills` CLI (`npx skills find <query>` to search,
+`npx skills add <owner/name>` to install; browse at https://skills.sh).
+
+1. **Resolve a candidate skill per detected technology.** Start from this map, then fall back to
+   search for anything not listed:
+   - Vue → `vue`, `vue-best-practices`, `vueuse-functions`; Nuxt → `nuxt`; Pinia → `pinia`
+   - React → `vercel-react-best-practices`; React Native → `vercel-react-native-skills`
+   - Tailwind CSS → `tailwindcss`; UnoCSS → `unocss`; shadcn/ui → `shadcn`
+   - Vite → `vite`; Vitest → `vitest`; pnpm → `pnpm`; Turborepo → `turborepo`; tsdown → `tsdown`
+   - Go → `golang-pro`; Rust → `rust-best-practices`; Tauri → `tauri-v2`
+   - VitePress → `vitepress`; Slidev → `slidev`
+   - **Fallback** — for anything not in this map, run `npx skills find <technology>` and pick the
+     top result that is well-installed and from a reputable source. If nothing solid turns up,
+     skip it (do not invent a package name).
+
+2. **Check whether each candidate is already installed.** Look for a directory or symlink of that
+   name containing a `SKILL.md` under `~/.agents/skills/`, `~/.claude/skills/`, and the
+   project-local `./.claude/skills/`. Treat that as installed.
+
+3. **For candidates that are NOT installed, ask before installing anything** — installing hits
+   the network and writes outside the repo. Use the AskUserQuestion tool, listing the missing
+   skills in one batch ("Install these skills for the detected stack?"). For each one the user
+   approves, resolve the exact `owner/name` with `npx skills find` and run `npx skills add
+   <owner/name>`. If the user declines a skill, skip it and instead leave a plain-text convention
+   note for that technology in `style.md` rather than a link.
+
+4. **Copy the resolved skills into the project**, following symlinks so the real files land in the
+   repo and are version-pinned with it:
+   ```
+   cp -RL <resolved skill dir> <project>/.agents/skills/<name>
+   ```
+   Skip any `<name>` that already exists under `.agents/skills/` (idempotent). Do not copy this
+   `harness-skill` itself.
+
+5. **Reference them from the rules.** In `.agents/rules/style.md`, under a
+   **Framework conventions (skills)** heading, list each copied skill, what it governs, and a link
+   to `.agents/skills/<name>/`. Group styling/frontend skills there; backend/test skills may be
+   noted in the same section or alongside the relevant rule.
+
 ## Step 4 — Idempotency & safety
 
 - If `AGENTS.md`, `.agents/` (any of `AGENTS.md`, `rules/*`, `commands/`, `skills/`), or
@@ -211,6 +257,8 @@ shows the stack warrants it:
   confirmation. When merging into an existing flat `.agents/AGENTS.md`, offer to split its
   contents into the `rules/` files rather than duplicating them.
 - For symlinks, skip any name that is already taken and report it.
+- For framework skills (Step 3.8), skip any `.agents/skills/<name>` that already exists rather
+  than overwriting it, and never install a skill without the user's explicit approval.
 
 ## Step 5 — Report
 
