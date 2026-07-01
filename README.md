@@ -15,10 +15,8 @@ It handles two cases:
 ### Via skills.sh (recommended)
 
 ```bash
-npx skills add <your-github-username>/harness-skill
+npx skills add ZhaoJiSen/harness-skill
 ```
-
-(Replace `<your-github-username>` with the GitHub account this repo lives under.)
 
 ### Via npm
 
