@@ -1,8 +1,7 @@
-# agents-md-init
+# harness-skill
 
-Install the **`harness-init`** agent skill with one command. The skill scaffolds a complete set
-of **AGENTS.md-standard** files into a project — the public "agent-native repo" spec promoted by
-Harness.
+An agent skill that scaffolds a complete set of **AGENTS.md-standard** files into a project —
+the public "agent-native repo" spec promoted by Harness.
 
 It handles two cases:
 
@@ -11,25 +10,28 @@ It handles two cases:
 - **Existing project** — auto-detects your stack, build/test commands, and layout from the code
   and config, then generates populated files.
 
-## Install (Node)
+## Install
 
-Run the installer with npx (no global install needed):
-
-```bash
-npx agents-md-init
-```
-
-…or install it globally so the command stays available:
+### Via skills.sh (recommended)
 
 ```bash
-npm install -g agents-md-init
-agents-md-init
+npx skills add <your-github-username>/harness-skill
 ```
 
-Either way it copies the skill into `~/.claude/skills/harness-init`. Then, in any project,
-invoke it with `/harness-init` in Claude Code (or just ask your agent to "set up AGENTS.md").
+(Replace `<your-github-username>` with the GitHub account this repo lives under.)
 
-### Installer options
+### Via npm
+
+```bash
+npx harness-skill
+# or install globally:
+npm install -g harness-skill && harness-skill
+```
+
+Either path installs the skill into `~/.claude/skills/harness-skill`. Then, in any project,
+invoke it with `/harness-skill` in Claude Code (or just ask your agent to "set up AGENTS.md").
+
+#### npm installer options
 
 ```
 -p, --project      Install into ./.claude/skills instead of the home dir
@@ -54,15 +56,21 @@ invoke it with `/harness-init` in Claude Code (or just ask your agent to "set up
 
 ## Repo layout
 
-- `bin/cli.js` — the Node installer (zero dependencies).
-- `SKILL.md` — the skill's instructions (the flow the agent follows).
-- `templates/` — file skeletons for `AGENTS.md`, `.agents/AGENTS.md`, and `llms.txt`.
-- `reference/harness-spec.md` — condensed spec, loaded on demand.
+```
+skills/harness-skill/
+├── SKILL.md                  # the skill's instructions (the flow the agent follows)
+├── templates/                # skeletons for AGENTS.md, .agents/AGENTS.md, llms.txt
+└── reference/harness-spec.md # condensed spec, loaded on demand
+bin/cli.js                    # zero-dependency npm installer
+```
+
+`skills/harness-skill/` is a self-contained skill directory, so `skills add` installs exactly
+those files and nothing else.
 
 ## The standard
 
-Based on the AGENTS.md hierarchical configuration standard. See `reference/harness-spec.md` for
-a condensed version, and:
+Based on the AGENTS.md hierarchical configuration standard. See
+`skills/harness-skill/reference/harness-spec.md` for a condensed version, and:
 
 - https://agentsstandard.com/
 - https://www.harness.io/blog/the-agent-native-repo-why-agents-md-is-the-new-standard

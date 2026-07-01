@@ -2,8 +2,8 @@
 'use strict';
 
 /**
- * Installer for the "harness-init" agent skill.
- * Copies the skill assets into an agent skills directory (default: ~/.claude/skills).
+ * Installer for the "harness-skill" agent skill.
+ * Copies the skill into an agent skills directory (default: ~/.claude/skills).
  * Zero runtime dependencies — Node built-ins only.
  */
 
@@ -11,24 +11,24 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const SKILL_NAME = 'harness-init';
+const SKILL_NAME = 'harness-skill';
 const PKG_ROOT = path.join(__dirname, '..');
-const ASSETS = ['SKILL.md', 'templates', 'reference'];
+const SKILL_SRC = path.join(PKG_ROOT, 'skills', SKILL_NAME);
 
 function readPkg() {
   try {
     return JSON.parse(fs.readFileSync(path.join(PKG_ROOT, 'package.json'), 'utf8'));
   } catch {
-    return { name: 'agents-md-init', version: '0.0.0' };
+    return { name: SKILL_NAME, version: '0.0.0' };
   }
 }
 
 const HELP = `
-agents-md-init — install the "${SKILL_NAME}" agent skill
+harness-skill — install the "${SKILL_NAME}" agent skill
 
 Usage:
-  npx agents-md-init [options]
-  agents-md-init [options]          (after: npm i -g agents-md-init)
+  npx harness-skill [options]
+  harness-skill [options]           (after: npm i -g harness-skill)
 
 The skill scaffolds AGENTS.md-standard files into a project. Once installed,
 invoke it in a project with /${SKILL_NAME} (Claude Code) or by asking your
@@ -79,6 +79,12 @@ function main() {
     return;
   }
 
+  if (!fs.existsSync(SKILL_SRC)) {
+    console.error(`✖ Skill source not found at ${SKILL_SRC}. Is the package intact?`);
+    process.exitCode = 1;
+    return;
+  }
+
   const base = resolveSkillsBase(opts);
   const target = path.join(base, SKILL_NAME);
 
@@ -89,14 +95,9 @@ function main() {
     return;
   }
 
-  fs.mkdirSync(target, { recursive: true });
-  for (const asset of ASSETS) {
-    const src = path.join(PKG_ROOT, asset);
-    if (!fs.existsSync(src)) continue;
-    const dest = path.join(target, asset);
-    fs.rmSync(dest, { recursive: true, force: true });
-    fs.cpSync(src, dest, { recursive: true });
-  }
+  fs.rmSync(target, { recursive: true, force: true });
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.cpSync(SKILL_SRC, target, { recursive: true });
 
   console.log(`✔ Installed the "${SKILL_NAME}" skill to:`);
   console.log(`    ${target}`);

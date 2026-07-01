@@ -1,9 +1,9 @@
 ---
-name: harness-init
+name: harness-skill
 description: Scaffold AGENTS.md-standard files (the Harness agent-native repo spec) into a project. Use when the user wants to initialize, generate, or set up AGENTS.md, agent rules, a .agents directory, llms.txt, or project conventions for AI coding agents. Handles empty projects (asks about the tech stack interactively) and existing projects (auto-detects the stack from code and config).
 ---
 
-# harness-init
+# harness-skill
 
 Generate a complete, spec-compliant set of AGENTS.md files for a project, following the
 public AGENTS.md hierarchical configuration standard as promoted by Harness. Read
