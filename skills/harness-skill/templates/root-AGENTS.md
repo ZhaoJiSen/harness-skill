@@ -24,15 +24,20 @@
   responsibilities, and feature map live in
   [`.agents/reference/architecture.md`](.agents/reference/architecture.md).
 - **Directory structure:**
-  ```
+
+  ```text
   TODO(verify): annotate the key top-level directories, e.g.
   src/          application code
   tests/        test suites
   scripts/      build & tooling
   ```
+
 - **Key dependencies:** TODO(verify): the few libraries an agent must not swap out or must use correctly.
 - **Deep reference (emit only the ones that apply):**
-  - [`.agents/reference/architecture.md`](.agents/reference/architecture.md) — module & feature map
+  - [`.agents/reference/architecture.md`](.agents/reference/architecture.md) — module map & layers
+  - [`.agents/reference/routes.md`](.agents/reference/routes.md) — full route table
+  - [`.agents/reference/features.md`](.agents/reference/features.md) — feature map (or
+    [`.agents/reference/product/`](.agents/reference/product/) — one file per domain when it grows)
   - [`.agents/reference/api-contracts.md`](.agents/reference/api-contracts.md) — API invariants
   - [`.agents/reference/config.md`](.agents/reference/config.md) — configuration fields
   - [`.agents/reference/data-model.md`](.agents/reference/data-model.md) — data model / schema

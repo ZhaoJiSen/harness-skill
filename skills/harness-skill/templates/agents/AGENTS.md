@@ -39,7 +39,10 @@ The rule files are authoritative; this is the short version so nothing is missed
 Depth that would blow the root `AGENTS.md` past ~300 lines lives in `reference/` (emitted only
 when it applies). Consult and keep it current:
 
-- [`reference/architecture.md`](reference/architecture.md) — module map, feature map, state machines.
+- [`reference/architecture.md`](reference/architecture.md) — module map, layers, state machines.
+- [`reference/routes.md`](reference/routes.md) — the full route table, generated from code.
+- [`reference/features.md`](reference/features.md) — the per-feature-point map (or
+  [`reference/product/`](reference/product/) — one file per domain when the surface is large).
 - [`reference/api-contracts.md`](reference/api-contracts.md) — response envelope, error codes,
   pagination, streaming/auth invariants, and the API source of truth.
 - [`reference/config.md`](reference/config.md) — configuration fields and runtime gotchas.

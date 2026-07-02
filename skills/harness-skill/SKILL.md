@@ -22,7 +22,12 @@ The end state for a project root is:
 │   │   ├── security.md  # security baseline
 │   │   └── testing.md   # testing policy + regression coverage
 │   ├── reference/   # DEEP detail, emitted only when it applies (keeps AGENTS.md an index)
-│   │   ├── architecture.md   # module map, feature map, state machines
+│   │   ├── architecture.md   # module map, layers, state machines
+│   │   ├── routes.md         # full route table, generated from code
+│   │   ├── features.md       # feature map (single file) — OR product/ below when it grows
+│   │   ├── product/          # one file per domain when there are many features
+│   │   │   ├── README.md     #   domain index
+│   │   │   └── <domain>.md    #   e.g. auth.md, backup.md — feature points per domain
 │   │   ├── api-contracts.md  # envelope, error codes, pagination, SSE, auth invariants
 │   │   ├── config.md         # configuration field reference
 │   │   └── data-model.md     # datastores, schema, migrations, PII
@@ -111,17 +116,38 @@ never a silent omission.
   is Playwright (or another E2E tool) wired up? do backend packages actually contain test files?
   Feed this into Step 3.5.
 
-**Functional map — extract from code, not just directory names (critique: modules are more than
-a tree).** For each top-level module/package/service, capture responsibility, entry point, key
-types, and who it talks to. Use language-specific extraction to build the feature list:
+**Functional map — extract from code, down to individual feature points (critique: the map came
+out as one line per domain — a route listing — instead of the actual features).** For each
+top-level module/package/service capture responsibility, entry point, key types, and who it talks
+to (→ `reference/architecture.md`). Then go a level deeper and enumerate the **feature points**,
+not just the domains (→ `reference/features.md` or `reference/product/`). Use language-specific
+extraction:
 
-- **Routes/APIs:** find the router definition and enumerate the route table — e.g. gin/echo (a
-  `RouterGroup` tree, often in a `v1.go`/`router.go`), Express/Fastify route registration, FastAPI
-  `@app.*` decorators, Spring `@RequestMapping`, Rails `routes.rb`. Point at the real file.
+- **Routes/APIs:** find the router definition and enumerate the **full** route table — e.g. gin/echo
+  (a `RouterGroup` tree, often in a `v1.go`/`router.go`), Express/Fastify route registration,
+  FastAPI `@app.*` decorators, Spring `@RequestMapping`, Rails `routes.rb`. Point at the real file.
+  This full table is its own doc, `reference/routes.md` — do not bury routes inside architecture.
 - **CLI:** the command tree (cobra/clap/commander/argparse subcommands).
 - **UI:** page/screen/route map (file-based routes, router config).
 - **Jobs/async:** cron/queue/worker registrations, SSE/websocket handlers.
-- This is the source for `reference/architecture.md`.
+
+For every **feature point** (not every domain) capture:
+
+- **Name** — from the user/operator's view, not the function name.
+- **What it does** — 1–2 sentences of observable behavior/intent.
+- **Entry points** — the route(s) (`method path`), backend handler (`file:symbol`), frontend
+  page/component (if any), CLI command (if any).
+- **Status** — enabled / **disabled (commented-out / behind a feature flag)** / planned. Commented
+  routes and pages must be flagged as *disabled*, never silently ignored as dead code.
+- **Data source** — where you read it from (routes/handlers, file-based UI routes, CLI tree,
+  cron/queue/SSE).
+
+Break each domain down: a "backup" domain is not one line but many feature points (tag-scoped
+config, global config, keys, SFTP test, chunked-upload resume, record list/detail/download, run,
+restore, upload-restore, SFTP sync — each with its own "what it does"). Feature-point descriptions
+are **intent-level and relatively stable**, so hand-written/derived content marked `TODO(verify)`
+is acceptable here — this does not violate the anti-rot rule, which targets volatile derived tables
+(field/route lists), not intent prose.
 
 **Interface contracts — locate the source of truth, and record where auto-derivation breaks
 (critique: no contract layer; models assumed typed).**
@@ -228,6 +254,18 @@ code changes. So:
   dicts), recommend the root-cause fix — extract it into a named type so swagger/codegen can see
   it — instead of transcribing fields that will silently drift.
 
+**Markdown quality — every generated `.md` must lint clean.** Write all generated Markdown so it
+passes `markdownlint` under a pragmatic ruleset (do **not** write a `.markdownlint.*` config into
+the target project — just author clean files). Specifically:
+
+- **Do enforce** the structural rules: one top-level `#` H1 per file (frontmatter may precede it);
+  headings increase by one level at a time; a blank line above and below every heading, list,
+  table, and fenced code block; every fenced code block declares a language; consistent list
+  markers and ordered-list numbering; no trailing whitespace; no hard tabs; exactly one trailing
+  newline; no bare URLs (use `[text](url)` or `<url>`).
+- **Do not enforce** line length (MD013) or inline-HTML bans (MD033) — long prose, wide tables, and
+  long links are fine and must not be mangled to satisfy a line limit.
+
 1. **`AGENTS.md`** (project root) — from `templates/root-AGENTS.md`. Four core sections:
    - Project Overview (purpose, architecture, directory structure, tech stack, key deps)
    - Build, Test & Push Instructions (exact commands, linter/formatter, pre-push checks)
@@ -268,13 +306,27 @@ code changes. So:
 5. **`.agents/reference/*`** — from `templates/agents/reference/`. The deep detail that keeps the
    root `AGENTS.md` an index. **Emit each file only when the project has that substance**; delete
    the ones that don't apply rather than shipping an empty shell:
-   - `architecture.md` — the module & feature map from Step 2B (responsibilities, entry points,
-     interactions, state machines). Emit for any non-trivial project.
+   - `architecture.md` — the module map from Step 2B (responsibilities, entry points, layers, state
+     machines). Emit for any non-trivial project. Keep the *full route listing* out of here — it
+     goes in `routes.md`.
+   - `routes.md` — the complete route table, generated from code (method, path, group,
+     handler `file:symbol`, auth, SSE, purpose, status). Emit for any project with an HTTP/RPC
+     surface. Follow the anti-rot rule: prefer a generator + refresh command; flag disabled/
+     commented-out routes rather than dropping them.
+   - **Feature docs — the per-feature-point map (not one line per domain).** Choose the shape by
+     size (guidance, not a hard number):
+     - Few domains / few feature points → a single `features.md`.
+     - Many domains or many feature points → a `product/` folder, **one file per domain**
+       (`product/auth.md`, `product/backup.md`, …) plus `product/README.md` as the index. Copy
+       `templates/agents/reference/product/_domain.md` per domain (the `_domain.md` skeleton itself
+       is not shipped). Use `product/` for the *product's functionality* — never name it
+       `production` and never conflate it with deployment or `deploy/`.
    - `api-contracts.md` — emit for an API service: envelope, error codes, pagination, SSE/stream
      format, auth/signature, and the pointer to the contract source of truth.
    - `config.md` — emit when the project has meaningful runtime configuration.
    - `data-model.md` — emit when any datastore client is present (even without a migrations tool).
-   Fill these using the anti-rot rule above, and link them from `AGENTS.md` / `.agents/AGENTS.md`.
+   Fill these using the anti-rot and markdown-lint rules above, and link them from `AGENTS.md` /
+   `.agents/AGENTS.md`.
 
 ## Step 3.5 — Mandatory testing policy
 
@@ -330,7 +382,8 @@ E2E specs as part of pre-push checks.
 ## Step 3.6 — Mandatory engineering constraints
 
 These apply to **every** project regardless of stack. Fill them into the generated files
-(concrete commands from the detected stack; only leave `TODO:` for values you truly cannot know).
+(concrete commands from the detected stack; only leave a `TODO(detect)`/`TODO(confirm)` marker for
+values you truly cannot know — never a bare `TODO:`).
 
 **Dependency changes:** before adding a new runtime dependency, prefer the standard library or
 an already-present dependency; adding a new one requires an explicit reason in the change. Pin
@@ -371,6 +424,20 @@ shows the stack warrants it:
 
 Detection should be specific: base each section on a concrete signal (a client library, a config
 key, a directory), not a coarse yes/no, so real layers aren't dropped because one tool was absent.
+
+### Open decision — per-domain rules
+
+Some projects want **domain-scoped rules** (e.g. constraints specific to `network`, `ha`,
+`backup`) in addition to the cross-cutting `.agents/rules/{style,security,testing}.md`. This is a
+judgment call, so surface it rather than deciding silently:
+
+- **Suggested default:** keep the three cross-cutting rule files, and put any domain-specific
+  constraints inside that domain's feature doc (`reference/product/<domain>.md`) — colocated with
+  the feature description, no extra structure.
+- **Alternative (offer it):** if a domain has substantial standalone rules, add
+  `.agents/rules/<domain>.md` and link it from `.agents/AGENTS.md`.
+- Ask the user which they prefer when the project clearly has heavy per-domain constraints; do not
+  hardcode either shape.
 
 ## Step 3.8 — Framework skills (wire the detected stack to agent skills)
 
